@@ -8,13 +8,36 @@ function usage() {
   cat <<EOF
 Usage:
 # kubectl show pods -cc overview,image
-    lists pods in a pretty view
+    combine the views you're investigating
 # kubectl show version
     prints out the kubectl-show version ($VERSION)
 # kubectl show help
     prints these usage instructions
 pretty prints resources
 EOF
+}
+
+# is aware of paths (multiple) to custom columns
+# expecting single value kind!
+# support lookup hierachy (e.g. name view available for everything)
+# add support for own custom-columns paths and ENV variables instead files
+function get_view() {
+  custom_columns_path="/Users/krizi/IdeaProjects/kubectl-show/custom-columns"
+  lookup_paths=("$custom_columns_path/$1/$2" "$custom_columns_path/$2")
+
+  #while [[ lookup_paths ]]; do
+
+  for FILE in "${lookup_paths[@]}"; do
+    if [[ -f "$FILE" ]]; then
+      echo "$FILE"
+      exit 0
+    fi
+  done
+}
+
+# TODO: map plurals and abbreviation to singular kind-name (po -> pod, pods -> pod, svc -> service)
+function get_singular_kind_name() {
+  echo $1
 }
 
 main() {
@@ -27,7 +50,7 @@ main() {
     key="$1"
 
     if [ -z "$kind" ]; then
-      kind=$1
+      kind=$(get_singular_kind_name $1)
     fi
 
     case $key in
@@ -60,15 +83,15 @@ main() {
     echo >&2 "kubectl is not installed"
     exit 1
   fi
-  custom_columns_path="/Users/krizi/IdeaProjects/kubectl-show/custom-columns"
 
   for entry in "${CUSTOM_VIEW[@]}"; do
-    columns+=$(head -n 1 $custom_columns_path/$kind/$entry)
+    path_view=$(get_view $kind $entry)
+
+    columns+=$(head -n 1 $path_view)
     columns+=","
   done
 
   eval "$command -o custom-columns=${columns%?}"
-
 }
 
 main "$@"

@@ -1,0 +1,1 @@
+REPLICAS:.status.replicas,READY:.status.readyReplicas,LAST-STATUS:.status.conditions[-1].status
