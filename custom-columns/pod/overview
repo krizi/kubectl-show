@@ -1,0 +1,1 @@
+NAMESPACE:.metadata.namespace,NAME:.metadata.name,STATUS:.status.phase,RESTARTS:.status.containerStatuses[*].restartCount,START:.status.startTime

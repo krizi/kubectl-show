@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+VERSION='0.0.1'
+
+set -euo pipefail
+
+function usage() {
+  cat <<EOF
+Usage:
+# kubectl show pods -cc overview,image
+    lists pods in a pretty view
+# kubectl show version
+    prints out the kubectl-show version ($VERSION)
+# kubectl show help
+    prints these usage instructions
+pretty prints resources
+EOF
+}
+
+main() {
+  command="kubectl get"
+
+  CUSTOM_VIEW=("overview")
+
+  kind=""
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+
+    if [ -z "$kind" ]; then
+      kind=$1
+    fi
+
+    case $key in
+    -vw | --view)
+      IFS=','
+      read -a CUSTOM_VIEW <<<"$2"
+      shift # past argument
+      shift # past value
+      ;;
+    -h | --help)
+      usage
+      exit 0
+      ;;
+    -version)
+      version
+      exit 0
+      ;;
+    *) # unknown option
+      command+=" $1"
+      shift # past argument
+      ;;
+    esac
+  done
+
+  if hash kubectl 2>/dev/null; then
+    KUBECTL=kubectl
+  elif hash kubectl.exe 2>/dev/null; then
+    KUBECTL=kubectl.exe
+  else
+    echo >&2 "kubectl is not installed"
+    exit 1
+  fi
+  custom_columns_path="/Users/krizi/IdeaProjects/kubectl-show/custom-columns"
+
+  for entry in "${CUSTOM_VIEW[@]}"; do
+    columns+=$(head -n 1 $custom_columns_path/$kind/$entry)
+    columns+=","
+  done
+
+  eval "$command -o custom-columns=${columns%?}"
+
+}
+
+main "$@"

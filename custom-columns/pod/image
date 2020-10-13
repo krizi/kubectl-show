@@ -1,0 +1,1 @@
+IMAGE:.spec.containers[*].image,IMAGE_PULL_POLICY:.spec.containers[*].imagePullPolicy
