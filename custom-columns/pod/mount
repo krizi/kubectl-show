@@ -1,0 +1,1 @@
+MOUNT:.spec.containers[*].volumeMounts[*].name,MOUNTPATH:.spec.containers[*].volumeMounts[*].mountPath
