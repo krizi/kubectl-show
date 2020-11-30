@@ -4,7 +4,11 @@ VERSION='0.0.1'
 
 SHELL_PATH=$0
 
-CUSTOM_COLUMNS_PATH=$(dirname $(dirname $SHELL_PATH/custom-columns))
+DEFAULT_VIEW_PREFIX="KUBECTL_SHOW_DEFAULT_"
+
+DEFAULT_CUSTOM_COLUMNS_PATH=$(dirname $SHELL_PATH)/custom-columns
+
+CUSTOM_COLUMNS_PATH=$(dirname $SHELL_PATH)/custom-columns
 
 set -euo pipefail
 
@@ -24,6 +28,7 @@ EOF
 }
 
 function show_views() {
+  echo "CUSTOM_COLUMNS_PATH== > $CUSTOM_COLUMNS_PATH"
   ls -R $CUSTOM_COLUMNS_PATH
 }
 
@@ -31,11 +36,18 @@ function show_views() {
 # expecting single value kind!
 # support lookup hierachy (e.g. name view available for everything)
 # add support for own custom-columns paths and ENV variables instead files
+# Parameter#1 Kind
+# Parameter#2 View
 function get_view() {
-  custom_columns_path=$CUSTOM_COLUMNS_PATH
-  lookup_paths=("$custom_columns_path/$1/$2" "$custom_columns_path/$2")
+  lookup_paths=("$CUSTOM_COLUMNS_PATH/$1/$2" "$CUSTOM_COLUMNS_PATH/$2")
 
-  #while [[ lookup_paths ]]; do
+  #default_view_env=$(eval "$DEFAULT_VIEW_PREFIX$1" | tr [a-z] [A-Z])
+
+  #if [ -z ${default_view_env} ]; then
+   # lookup_paths=("$CUSTOM_COLUMNS_PATH/$1/$2" "$CUSTOM_COLUMNS_PATH/$2")
+  #else
+  #  lookup_paths=("$default_view_env" "$CUSTOM_COLUMNS_PATH/$default_view_env")
+  #fi
 
   for FILE in "${lookup_paths[@]}"; do
     if [[ -f "$FILE" ]]; then
@@ -43,18 +55,26 @@ function get_view() {
       exit 0
     fi
   done
+
+  echo "nofound"
+  exit 0
+}
+
+# TODO DOES NOT WORK YET: kubectl api-resources |  tr -s " " "=" | cut -d "=" -f 1,4
+# should return mapping pods=pod
+# cut -f 2,4 ==> po=pod
+function generate_mapping_file() {
+  echo "no file generated"
 }
 
 # TODO: map plurals and abbreviation to singular kind-name (po -> pod, pods -> pod, svc -> service)
+# generate mapping file once (temp-folder) and cache it, allow regenerate
 function get_singular_kind_name() {
   echo $1
 }
 
 main() {
   command="kubectl get"
-
-
-
   CUSTOM_VIEW=("overview")
 
   kind=""
@@ -66,7 +86,7 @@ main() {
     fi
 
     case $key in
-    views-available)
+    views)
       show_views
       exit 0
       ;;
@@ -109,7 +129,10 @@ main() {
     columns+=","
   done
 
+  echo "Columns: $columns"
+
   eval "$command -o custom-columns=${columns%?}"
+  exit 0
 }
 
 main "$@"

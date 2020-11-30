@@ -1,1 +1,1 @@
-CONFIGMAP:.spec.volumes[*].configMap.name
+CONFIGMAP:.spec.volumes[*].name

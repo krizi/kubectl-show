@@ -1,1 +1,1 @@
-CPU:.spec.containers[*].resources.requests.cpu,MEMORY:.spec.containers[*].requests.memory
+CPU-REQ:.spec.containers[*].resources.requests.cpu,MEMORY-REQ:.spec.containers[*].requests.memory

@@ -1,4 +1,14 @@
+# Intro
+introduce views to kubectl ressources. combine views. easy way to check your k8s resources.
 
+## Setup
+```
+git clone https://github.com/krizi/kubectl-show.git
+cd kubectl-show
+export PATH=$PWD:$PATH
+```
+
+## Usage
 ```
 > k show pod --view overview,node
 NAMESPACE   NAME                                            STATUS    RESTARTS   START                  NODE       HOSTIP
@@ -28,4 +38,4 @@ argocd      argocd-repo-server-59fddff8f8-gl5rn             ssh-known-hosts,tls-
 argocd      argocd-server-d896cbbcb-xr2ht                   ssh-known-hosts,tls-certs,argocd-server-token-bktf4   /app/config/ssh,/app/config/tls,/var/run/secrets/kubernetes.io/serviceaccount
 ```
 # Restrictions
-
+use jsonpath views or combien custom columns together. not possible for the moment to combine different jsonpath columns. 
